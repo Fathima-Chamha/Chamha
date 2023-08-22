@@ -1,0 +1,76 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
+struct Student {
+    std::string name;
+    double biology;
+    double physics;
+    double chemistry;
+    double totalMarks;
+    int schoolRank;
+    int classRank;
+};
+
+const int NUM_CLASSES_BIO = 3;
+const int NUM_CLASSES_MATH = 5;
+const int CLASS_SIZE = 40;
+
+bool compareByTotalMarks(const Student &a, const Student &b) {
+    return a.totalMarks > b.totalMarks;
+}
+
+void calculateRanks(std::vector<Student> &students) {
+    std::sort(students.begin(), students.end(), compareByTotalMarks);
+
+    int currentRank = 1;
+    for (size_t i = 0; i < students.size(); ++i) {
+        students[i].schoolRank = currentRank;
+        if (i > 0 && students[i].totalMarks != students[i - 1].totalMarks) {
+            currentRank = i + 1;
+        }
+    }
+
+    for (int classNum = 0; classNum < NUM_CLASSES_BIO + NUM_CLASSES_MATH; ++classNum) {
+        currentRank = 1;
+        for (size_t i = 0; i < students.size(); ++i) {
+            if (students[i].classRank == 0 && students[i].classNum == classNum) {
+                students[i].classRank = currentRank;
+                if (i > 0 && students[i].totalMarks != students[i - 1].totalMarks) {
+                    currentRank = i + 1;
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    std::vector<Student> students;
+
+    // Read student data from file or input
+
+    // Calculate total marks and ranks
+    calculateRanks(students);
+
+    // Print and write results to a file
+    std::ofstream outputFile("rank_results.txt");
+    if (outputFile.is_open()) {
+        for (const Student &student : students) {
+            std::cout << "Student: " << student.name << "\n";
+            std::cout << "Total Marks: " << student.totalMarks << "\n";
+            std::cout << "School Rank: " << student.schoolRank << "\n";
+            std::cout << "Class Rank: " << student.classRank << "\n\n";
+
+            outputFile << "Student: " << student.name << "\n";
+            outputFile << "Total Marks: " << student.totalMarks << "\n";
+            outputFile << "School Rank: " << student.schoolRank << "\n";
+            outputFile << "Class Rank: " << student.classRank << "\n\n";
+        }
+        outputFile.close();
+    } else {
+        std::cerr << "Error opening output file.\n";
+    }
+
+    return 0;
+}
